@@ -4,40 +4,51 @@ class Solution {
     {
         int profit;
         int deadline;
-    }jobs;
-    static bool comparator(jobs & j1,jobs &j2)
+    }job;
+    static bool comparator(const job &j1,const job &j2)
     {
         return j1.profit>j2.profit;
     }
     vector<int> jobSequencing(vector<int> &deadline, vector<int> &profit) {
         // code here
-        int maxi = INT_MIN;
         int n = profit.size();
-        vector<jobs> schedule(n);
+        vector<job> sq(n);
         for(int i=0;i<n;i++)
         {
-            schedule[i].deadline = deadline[i];
-            schedule[i].profit = profit[i];
-            maxi = max(maxi,deadline[i]);
+            sq[i].deadline = deadline[i];
+            sq[i].profit = profit[i];
         }
-        sort(schedule.begin(),schedule.end(),comparator);
-        vector<bool> lastDate(maxi+1,0);
+        sort(sq.begin(),sq.end(),comparator);
+        int maxDeadline = -1;
+        for(int i=0;i<n;i++)
+        {
+            maxDeadline = max(maxDeadline,deadline[i]);
+        }
+        vector<bool> schedular(maxDeadline+1);
         int maxProfit = 0;
-        int jobsCompleted = 0;
+        int totalJobsCompleted = 0;
         for(int i=0;i<n;i++)
         {
-            int deadline = schedule[i].deadline;
-            while(deadline>0 && lastDate[deadline])
+            if(!schedular[sq[i].deadline])
             {
-                deadline--;
+                maxProfit+=sq[i].profit;
+                totalJobsCompleted++;
+                schedular[sq[i].deadline] = 1;
             }
-            if(deadline>0)
+            else
             {
-                lastDate[deadline] = 1;
-                jobsCompleted++;
-                maxProfit+=schedule[i].profit;
+                for(int j=sq[i].deadline-1;j>=1;j--)
+                {
+                    if(!schedular[j])
+                    {
+                        schedular[j] = 1;
+                        maxProfit+=sq[i].profit;
+                        totalJobsCompleted++;
+                        break;
+                    }
+                }
             }
         }
-        return {jobsCompleted,maxProfit};
+        return {totalJobsCompleted,maxProfit};
     }
 };
